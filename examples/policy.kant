@@ -1,0 +1,297 @@
+# Busbar Policy Substrate (Busbar-first, Context-Native, HQL-heavy)
+#
+# This file defines the *declared language* for composing policies AND
+# a minimal default Policy space at `/Busbar/Policy` that other contexts
+# can layer/override via higher-priority stacks and/or Boundaries.
+#
+# Key ideas:
+# - Authorize *Invocations*, not Actions.
+# - Every Invocation targets N HQL-selected point sets (no lists).
+# - Routing is by Action + HQL patterns over targets + context scope.
+# - Policies are compositional: PolicySets contain PolicyFragments, and
+#   fragments can contain fragments (turtles all the way down).
+# - Cedar (or any evaluator) is an *adapter*; Busbar language is canonical.
+
+⛩️:
+  # ===========================================================================
+  # Meanings (canonical Busbar vocabulary)
+  # ===========================================================================
+
+  Meaning@Policy:
+    Category: /Busbar/Policy
+    meaning: Policy Space
+    purpose: Canonical Busbar policy substrate for routing and composing authorization logic
+
+  Meaning@Invocation:
+    Category: /Busbar/Policy
+    meaning: Invocation
+    purpose: Context-native request to perform an action against one or more HQL-selected targets in a composed frame by a principal chain
+
+  Meaning@Target:
+    Category: /Busbar/Policy
+    meaning: Target
+    purpose: Named HQL selector that projects a set of points from the composed frame (no lists)
+
+  Meaning@Decision:
+    Category: /Busbar/Policy
+    meaning: Decision
+    purpose: Result of evaluating an Invocation in a particular composed frame and scope
+
+  Meaning@Outcome:
+    Category: /Busbar/Policy
+    meaning: Outcome
+    purpose: Decision outcome as a modeled gradient (not boolean)
+
+  Meaning@Route:
+    Category: /Busbar/Policy
+    meaning: Route
+    purpose: Routing rule selecting which PolicySet applies to an Invocation based on action and HQL selectors
+
+  Meaning@PolicySet:
+    Category: /Busbar/Policy
+    meaning: Policy Set
+    purpose: Named set of policy fragments that compose into the effective policy for an Invocation
+
+  Meaning@PolicyFragment:
+    Category: /Busbar/Policy
+    meaning: Policy Fragment
+    purpose: Composable policy component; may contain other fragments; used to generate effective policy and/or compiled artifacts
+
+  Meaning@Engine:
+    Category: /Busbar/Policy
+    meaning: Policy Engine
+    purpose: Adapter that evaluates or compiles Busbar policy structures (e.g., Cedar) without owning Busbar vocabulary
+
+  Meaning@selector:
+    Category: /Busbar/Policy/HQL
+    meaning: HQL Selector
+    purpose: HQL query expression selecting points in a composed frame
+
+  Meaning@action:
+    Category: /Busbar/Policy
+    meaning: Action
+    purpose: Canonical Busbar operation name being requested (never authorized without context)
+
+  Meaning@context_selector:
+    Category: /Busbar/Policy/HQL
+    meaning: Context Selector
+    purpose: HQL selector describing the invocation scope context (where execution is anchored)
+
+  Meaning@target_selector:
+    Category: /Busbar/Policy/HQL
+    meaning: Target Selector
+    purpose: HQL selector describing what is being acted upon
+
+  Meaning@priority:
+    Category: /Busbar/Policy/Composition
+    meaning: Priority
+    purpose: Numeric precedence used to deterministically order compositional fragments without lists
+
+  Meaning@requires_signals:
+    Category: /Busbar/Policy/Signals
+    meaning: Required Signals
+    purpose: Named Space of required signal keys (no lists); signals must be present/evaluable
+
+  Meaning@thresholds:
+    Category: /Busbar/Policy/Signals
+    meaning: Thresholds
+    purpose: Signal threshold constraints used by a fragment; semantics are scope-dependent via marker neighborhoods
+
+  Meaning@composition:
+    Category: /Busbar/Policy/Composition
+    meaning: Composition
+    purpose: How nested fragments combine (deny overrides, all must permit, etc.)
+
+  Meaning@match:
+    Category: /Busbar/Policy/Routing
+    meaning: Match Mode
+    purpose: How routing selectors match across N targets (any/all/named); modeled, not enum
+
+  Meaning@reason:
+    Category: /Busbar/Policy/Explain
+    meaning: Reason
+    purpose: Human-readable explanation of a decision bound to marker neighborhoods and frame hash
+
+  Meaning@frame_hash:
+    Category: /Busbar/Provenance
+    meaning: Frame Hash
+    purpose: Content-addressed hash of the composed substrate used to evaluate this decision
+
+  # ===========================================================================
+  # Outcome Mapping (no booleans)
+  # ===========================================================================
+  Meaning@Outcome:
+    Mapping:
+      -1.0:
+        meaning: Deny
+        purpose: Authorization denied
+        Convert: Text
+        value: deny
+      0.0:
+        meaning: Indeterminate
+        purpose: Not enough information to decide; treat as deny in strict modes
+        Convert: Text
+        value: indeterminate
+      1.0:
+        meaning: Permit
+        purpose: Authorization granted
+        Convert: Text
+        value: permit
+
+  # ===========================================================================
+  # Composition Mode Mapping (modeled, not enum)
+  # ===========================================================================
+  Meaning@composition:
+    Mapping:
+      -1.0:
+        meaning: DenyOverrides
+        purpose: Any deny from any fragment denies the Invocation
+        Convert: Text
+        value: deny_overrides
+      0.0:
+        meaning: AllMustPermit
+        purpose: All relevant fragments must permit
+        Convert: Text
+        value: all_must_permit
+      1.0:
+        meaning: PermitOverrides
+        purpose: Any permit permits (generally unsafe; reserved for specific internal uses)
+        Convert: Text
+        value: permit_overrides
+
+  # ===========================================================================
+  # Routing Match Mode Mapping (modeled, not enum)
+  # ===========================================================================
+  Meaning@match:
+    Mapping:
+      -1.0:
+        meaning: AnyTarget
+        purpose: Route matches if any target selector matches any point
+        Convert: Text
+        value: any
+      0.0:
+        meaning: AllTargets
+        purpose: Route matches only if all target selectors match at least one point
+        Convert: Text
+        value: all
+      1.0:
+        meaning: NamedTargets
+        purpose: Route matches only against specific named targets declared under Route.RequiredTargets
+        Convert: Text
+        value: named
+
+  # ===========================================================================
+  # Shapes (declared structural substrate)
+  # ===========================================================================
+
+  # A Target is an HQL selector with purpose. Targets live as named children
+  # under Invocation.Targets (no lists).
+  Space@Target:
+    selector
+    purpose
+    scope
+
+  # Invocation is the canonical evaluation unit.
+  Space@Invocation:
+    action
+    frame_hash
+    context
+    principal
+    Targets
+    signals
+
+  # A Route selects a PolicySet for a given Invocation.
+  Space@Route:
+    action
+    match
+    context_selector
+    target_selector
+    policy_set
+    RequiredTargets
+
+  # PolicyFragment: composable constraints. Fragments may contain fragments.
+  Space@PolicyFragment:
+    priority
+    composition
+    requires_signals
+    thresholds
+
+  # PolicySet: container whose children are PolicyFragments.
+  Space@PolicySet:
+    composition
+
+  # Engine: adapter config.
+  Space@Engine:
+    adapter
+    version
+    config
+
+  # Decision: evaluation output, bindable to audit.
+  Space@Decision:
+    outcome
+    reason
+    frame_hash
+    route
+    effective_policy_set
+    Targets
+    signals
+
+  # ===========================================================================
+  # Busbar Policy Space (default instance)
+  # ===========================================================================
+Busbar:
+  Policy@Policy:
+    # Engines are adapters (Busbar vocabulary stays canonical).
+    Engines:
+      Cedar@Engine:
+        adapter: cedar
+        version: "*"
+
+    # Routing rules (HQL-heavy). These are defaults and are meant to be
+    # overridden/extended by higher-priority layers or boundaries.
+    Routing:
+      # Default route for tool invocation against the mediation registry.
+      ToolInvokeRegistry@Route:
+        action: ToolInvoke
+        match: -1.0          # AnyTarget
+        context_selector: /**
+        target_selector: /Busbar/Mediation/Registry/**/Tools/**
+        policy_set: ToolInvokeDefault
+
+      # Default route for executing workflows (example anchor).
+      ExecuteWorkflow@Route:
+        action: ExecuteContext
+        match: -1.0          # AnyTarget
+        context_selector: /Busbar/Execution/**
+        target_selector: /**
+        policy_set: ExecuteContextDefault
+
+    # Policy sets (compositional fragments). Other layers can add or override.
+    Sets:
+      ToolInvokeDefault@PolicySet:
+        composition: -1.0     # DenyOverrides (safe default)
+
+        # Fragment: require that tools are known in registry (placeholder fragment).
+        RegistryKnown@PolicyFragment:
+          priority: 0.8
+          composition: 0.0    # AllMustPermit
+
+        # Fragment: signal thresholds gate (placeholder; actual thresholds live in /Busbar/Signals).
+        SignalGate@PolicyFragment:
+          priority: 0.6
+          composition: 0.0    # AllMustPermit
+          requires_signals:
+            confidence: 1
+            approval: 1
+            classification: 1
+            risk: 1
+
+      ExecuteContextDefault@PolicySet:
+        composition: -1.0     # DenyOverrides
+
+        AttestationGate@PolicyFragment:
+          priority: 0.7
+          composition: 0.0    # AllMustPermit
+          requires_signals:
+            verification: 1
+            confidence: 1

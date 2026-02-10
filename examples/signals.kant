@@ -1,0 +1,294 @@
+# Busbar Canonical Signals
+#
+# Purpose:
+# - Define the shared gradient spaces Busbar uses to reason about security, risk, intent,
+#   and operational constraints WITHOUT enums/bools/lists/nulls.
+# - A signal is a normalized float in [-1.0, 1.0].
+# - Meaning is carried by Mappings and Marker neighborhoods, not by opaque enum tokens.
+#
+# Design notes:
+# - These are CANONICAL definitions. Any repo/context may compose on top and
+#   adapt marker neighborhoods using Boundaries (e.g. ⛩️ Production:).
+# - Keep endpoints stable; prefer adapting interior anchors and semantics by scope.
+# - Each Marker provides Meaning + Value (Convert payload) and purpose.
+#
+# Category Root: /Busbar/Signals
+
+⛩️:
+  # ---------------------------------------------------------------------------
+  # Core Signal meaning type
+  # ---------------------------------------------------------------------------
+
+  Meaning@Signal:
+    Category: /Busbar/Signals
+    meaning: Signal
+    purpose: >
+      Normalized gradient value in [-1.0, 1.0] whose semantics are defined by
+      a Mapping of Markers. Signals are never "just a number".
+
+  # ---------------------------------------------------------------------------
+  # 1) Confidence — how certain we are about intent / correct operation
+  # ---------------------------------------------------------------------------
+
+  Meaning@confidence:
+    Category: /Busbar/Signals/Confidence
+    meaning: Confidence
+    purpose: >
+      How certain we are that the Invocation matches intended behavior.
+      Interpreted by marker neighborhood; used to gate autonomy.
+    Mapping:
+      -1.0:
+        meaning: Unverified
+        purpose: No verification of intent; treat as unknown/untrusted.
+        Convert: Text
+        value: unverified
+      0.0:
+        meaning: Implicit
+        purpose: Inferred from surrounding context but not confirmed.
+        Convert: Text
+        value: implicit
+      0.5:
+        meaning: Converged
+        purpose: Multiple signals or observers agree on the intent.
+        Convert: Text
+        value: converged
+      1.0:
+        meaning: Explicit
+        purpose: Confirmed by an explicit accountable principal action.
+        Convert: Text
+        value: explicit
+
+  # ---------------------------------------------------------------------------
+  # 2) Approval — what approval is required (not "is approved")
+  # ---------------------------------------------------------------------------
+
+  Meaning@approval:
+    Category: /Busbar/Signals/Approval
+    meaning: Required Approval
+    purpose: >
+      What approval level is required for an invocation, resource, or tool.
+      Boundaries may shift marker positions to reflect org policy.
+    Mapping:
+      -1.0:
+        meaning: Blocked
+        purpose: Never permitted in this scope.
+        Convert: Text
+        value: blocked
+      0.0:
+        meaning: None
+        purpose: No explicit approval required.
+        Convert: Text
+        value: none
+      0.3:
+        meaning: UserConfirmation
+        purpose: Requires explicit user confirmation in the loop.
+        Convert: Text
+        value: user_confirmation
+      0.5:
+        meaning: TeamLead
+        purpose: Requires team lead approval.
+        Convert: Text
+        value: team_lead
+      0.7:
+        meaning: Manager
+        purpose: Requires manager approval.
+        Convert: Text
+        value: manager
+      0.85:
+        meaning: CodeOwner
+        purpose: Requires approval by code owner / designated approver.
+        Convert: Text
+        value: code_owner
+      1.0:
+        meaning: VP
+        purpose: Highest approval bar required in this scope.
+        Convert: Text
+        value: vp
+
+  # ---------------------------------------------------------------------------
+  # 3) Risk — irreversibility / harm potential, independent of "classification"
+  # ---------------------------------------------------------------------------
+
+  Meaning@risk:
+    Category: /Busbar/Signals/Risk
+    meaning: Risk
+    purpose: >
+      Potential for irreversible harm. Not the same as classification; a read-only
+      action can still be risky (e.g., data exfiltration).
+    Mapping:
+      -1.0:
+        meaning: Reversible
+        purpose: Can be undone or has negligible harm.
+        Convert: Text
+        value: reversible
+      0.0:
+        meaning: Internal
+        purpose: Affects internal state only; limited blast radius.
+        Convert: Text
+        value: internal
+      0.5:
+        meaning: External
+        purpose: Affects external systems or persistent state.
+        Convert: Text
+        value: external
+      1.0:
+        meaning: Irreversible
+        purpose: Cannot be undone; may cause permanent harm.
+        Convert: Text
+        value: irreversible
+
+  # ---------------------------------------------------------------------------
+  # 4) Classification — operational side-effect class (read-only → destructive)
+  # ---------------------------------------------------------------------------
+
+  Meaning@classification:
+    Category: /Busbar/Signals/Classification
+    meaning: Classification
+    purpose: >
+      Security team's assessment of side-effect class. Used for default gating,
+      auditing, and policy routing.
+    Mapping:
+      -1.0:
+        meaning: ReadOnly
+        purpose: Reads data; no intended side-effects.
+        Convert: Text
+        value: read_only
+      0.0:
+        meaning: WriteVisible
+        purpose: Writes occur but are visible and reviewable; not destructive.
+        Convert: Text
+        value: write_visible
+      1.0:
+        meaning: Destructive
+        purpose: Can delete, destroy, or irreversibly modify resources.
+        Convert: Text
+        value: destructive
+
+  # ---------------------------------------------------------------------------
+  # 5) Blast Radius — scale of impact (small → global)
+  # ---------------------------------------------------------------------------
+
+  Meaning@blast_radius:
+    Category: /Busbar/Signals/BlastRadius
+    meaning: Blast Radius
+    purpose: >
+      Potential scope of impact if something goes wrong. Boundaries may adjust
+      marker neighborhoods to reflect infra topology and org risk tolerance.
+    Mapping:
+      -1.0:
+        meaning: Local
+        purpose: Single resource/isolated scope.
+        Convert: Text
+        value: local
+      0.0:
+        meaning: Team
+        purpose: Affects a team scope (multiple services/repos).
+        Convert: Text
+        value: team
+      0.5:
+        meaning: Org
+        purpose: Affects broader org scope.
+        Convert: Text
+        value: org
+      1.0:
+        meaning: Global
+        purpose: Affects many orgs/tenants or critical shared infrastructure.
+        Convert: Text
+        value: global
+
+  # ---------------------------------------------------------------------------
+  # 6) Reversibility — how feasible rollback/undo is (easy → impossible)
+  # ---------------------------------------------------------------------------
+
+  Meaning@reversibility:
+    Category: /Busbar/Signals/Reversibility
+    meaning: Reversibility
+    purpose: >
+      Feasibility of reversing an operation. This is a gradient, not a boolean.
+      A destructive action might still be reversible with backups; boundaries
+      can reflect that reality.
+    Mapping:
+      -1.0:
+        meaning: Irreversible
+        purpose: No rollback path or rollback is infeasible.
+        Convert: Text
+        value: irreversible
+      0.0:
+        meaning: Hard
+        purpose: Rollback possible but costly/risky/slow.
+        Convert: Text
+        value: hard
+      0.5:
+        meaning: Moderate
+        purpose: Rollback requires procedure but is feasible.
+        Convert: Text
+        value: moderate
+      1.0:
+        meaning: Easy
+        purpose: Rollback is straightforward and low-risk.
+        Convert: Text
+        value: easy
+
+  # ---------------------------------------------------------------------------
+  # 7) Verification — strength of verification performed (none → strong)
+  # ---------------------------------------------------------------------------
+
+  Meaning@verification:
+    Category: /Busbar/Signals/Verification
+    meaning: Verification
+    purpose: >
+      Strength of verification performed for an invocation (static checks, dry runs,
+      tests, reviews). Used to gate higher-risk actions.
+    Mapping:
+      -1.0:
+        meaning: None
+        purpose: No verification performed.
+        Convert: Text
+        value: none
+      0.0:
+        meaning: Basic
+        purpose: Basic validations (syntax/schema/shape checks).
+        Convert: Text
+        value: basic
+      0.5:
+        meaning: Tested
+        purpose: Verified through tests or simulation/dry-run.
+        Convert: Text
+        value: tested
+      1.0:
+        meaning: Strong
+        purpose: Verified through strong checks (attestation, independent confirmation).
+        Convert: Text
+        value: strong
+
+  # ---------------------------------------------------------------------------
+  # 8) Task Scope — alignment of action with declared task/intent (off → aligned)
+  # ---------------------------------------------------------------------------
+
+  Meaning@task_scope:
+    Category: /Busbar/Signals/TaskScope
+    meaning: Task Scope Alignment
+    purpose: >
+      How well an action aligns with the declared task/intent and allowed scope.
+      Low values indicate potential drift or prompt-injection-like divergence.
+    Mapping:
+      -1.0:
+        meaning: OffScope
+        purpose: Action is not aligned with declared intent/scope.
+        Convert: Text
+        value: off_scope
+      0.0:
+        meaning: Unclear
+        purpose: Alignment cannot be established confidently.
+        Convert: Text
+        value: unclear
+      0.5:
+        meaning: LikelyAligned
+        purpose: Appears aligned with intent based on context.
+        Convert: Text
+        value: likely_aligned
+      1.0:
+        meaning: Aligned
+        purpose: Clearly aligned with declared intent and scope.
+        Convert: Text
+        value: aligned

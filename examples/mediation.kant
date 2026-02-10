@@ -1,0 +1,168 @@
+# Busbar Mediation Registry (Kernel Module)
+#
+# This file defines the declared language and default structural anchors for
+# Busbar's Mediation Plane registry at the universal address:
+#
+#   /Busbar/Mediation/Registry
+#
+# Design goals:
+# - Context-native: Servers and Tools are addressable Points with universal paths.
+# - No lists: multiplicity is modeled as named Spaces containing named children.
+# - No booleans: use Signals (Mappings/Markers) for trust/classification/approval.
+# - Layering is core: this is a kernel substrate intended to be extended/overlaid.
+# - HQL-first: policies should target registry points using selectors, avoiding
+#   Cartesian explosion (no static enumeration of "every tool everywhere").
+#
+# Notes:
+# - This module intentionally stays generic. Provider domain vocabularies compose
+#   on top under /Busbar/Domains or /Busbar/Adapters, while Registry remains the
+#   canonical "what tools exist and how risky they are" substrate.
+# - Actual registry instances for a repo SHOULD live in `.busbar/servers.kant`
+#   (repo-local Busbar context), which is preloaded by workspace configuration.
+#
+# Expected usage pattern:
+# - Kernel declares Space/Meaning for Server and Tool.
+# - Project/repo supplies concrete registry instances in `.busbar`.
+# - Policies use HQL to select:
+#     /Busbar/Mediation/Registry/**/Tools/** (all tools)
+#     /Busbar/Mediation/Registry/**@changed (overlay changes when stacked)
+#
+# ---------------------------------------------------------------------------
+
+⛩️:
+  # ---------------------------------------------------------------------------
+  # Meanings
+  # ---------------------------------------------------------------------------
+
+  Meaning@Mediation:
+    Category: /Busbar/Mediation
+    meaning: Mediation
+    purpose: Tool and server brokering substrate (registry + controlled access)
+
+  Meaning@Registry:
+    Category: /Busbar/Mediation
+    meaning: Registry
+    purpose: Canonical registry of approved servers and their tools, expressed as addressable context points
+
+  Meaning@Server:
+    Category: /Busbar/Mediation/Registry
+    meaning: Server
+    purpose: A tool provider endpoint and its assessed trust posture
+
+  Meaning@Tool:
+    Category: /Busbar/Mediation/Registry
+    meaning: Tool
+    purpose: An individual tool exposed by a server with assessed risk and approval requirements
+
+  Meaning@id:
+    Category: /Busbar/Mediation/Registry/Server
+    meaning: Server Id
+    purpose: Stable server identifier (e.g. "@github/mcp", "@salesforce/mcp")
+
+  Meaning@version:
+    Category: /Busbar/Mediation/Registry/Server
+    meaning: Server Version
+    purpose: Version constraint for server implementation (e.g. "*", "1.2.3")
+
+  Meaning@trusted:
+    Category: /Busbar/Mediation/Registry/Server
+    meaning: Trust Signal
+    purpose: Trust level signal for this server (normalized [-1.0, 1.0], semantics via marker neighborhood)
+
+  Meaning@command:
+    Category: /Busbar/Mediation/Registry/Server
+    meaning: Command
+    purpose: Command used to launch the server (stdio endpoint)
+
+  Meaning@endpoint:
+    Category: /Busbar/Mediation/Registry/Server
+    meaning: Endpoint
+    purpose: Endpoint definition for connecting to the server (stdio/http/etc.)
+
+  Meaning@Env:
+    Category: /Busbar/Mediation/Registry/Server
+    meaning: Environment
+    purpose: Environment variable bindings for launching the server (named space, no lists)
+
+  Meaning@name:
+    Category: /Busbar/Mediation/Registry/Tool
+    meaning: Tool Name
+    purpose: Canonical tool name as presented to callers
+
+  Meaning@classification:
+    Category: /Busbar/Signals/Classification
+    meaning: Classification
+    purpose: Operational side-effect classification signal (read-only → destructive)
+
+  Meaning@approval:
+    Category: /Busbar/Signals/Approval
+    meaning: Required Approval
+    purpose: Approval requirement signal (blocked → VP)
+
+  Meaning@risk:
+    Category: /Busbar/Signals/Risk
+    meaning: Risk
+    purpose: Irreversibility / harm potential signal
+
+  Meaning@capabilities:
+    Category: /Busbar/Mediation/Registry/Tool
+    meaning: Capabilities
+    purpose: Named space of declared capabilities for the tool (avoid enums/lists)
+
+  Meaning@scope:
+    Category: /Busbar/Mediation/Registry/Tool
+    meaning: Scope
+    purpose: HQL selector describing the default scope of resources this tool may touch
+
+  # ---------------------------------------------------------------------------
+  # Shapes
+  # ---------------------------------------------------------------------------
+
+  # Registry container. Children are Server nodes.
+  Space@Registry:
+    meaning
+    purpose
+
+  # Server definition. Children include Tools and optional Env.
+  Space@Server:
+    id
+    version
+    trusted
+    endpoint
+    command
+    Env
+    Tools
+
+  # Tool definition. Tools are the main subjects of policy evaluation.
+  Space@Tool:
+    name
+    classification
+    approval
+    risk
+    scope
+    capabilities
+
+  # Environment variable entry (named child under Server.Env).
+  Space@EnvVar:
+    name
+    value
+
+# ---------------------------------------------------------------------------
+# Kernel Context Anchors
+# ---------------------------------------------------------------------------
+# This instantiates the canonical mediation registry root at:
+#   /Busbar/Mediation/Registry
+#
+# Repo-local instances should compose on top (typically in `.busbar/servers.kant`)
+# by defining Busbar/Mediation/Registry/... servers and tools.
+#
+# This file provides the stable anchor and declared language for doing so.
+
+Busbar:
+  Mediation:
+    Meaning: Mediation
+      purpose: Mediation plane anchor for tool/server brokering
+    Registry@Registry:
+      meaning: Busbar Mediation Registry
+      purpose: Approved servers and tools with semantic risk/approval signals
+      # Servers and tools are provided by repo-local overlays in `.busbar`.

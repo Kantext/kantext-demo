@@ -1,0 +1,331 @@
+# Busbar Audit Kernel Module
+#
+# Purpose:
+# - Provide the declared-language substrate for audit events that are:
+#     - context-native (bound to frame hash + HQL selectors)
+#     - explainable (marker neighborhoods, not enums/bools)
+#     - portable (Busbar vocabulary is canonical; adapters may project elsewhere)
+# - This module does NOT implement storage or cryptography. It defines the
+#   semantic and structural schema that audit systems record.
+#
+# Design constraints:
+# - No lists: multiplicity is modeled as Spaces of named children.
+# - No nulls: absence must be modeled explicitly if needed.
+# - No booleans: use Mappings/Markers for modeled gradients.
+# - Universal addressability: audit points are addressable by their path.
+# - Layering is core: boundaries may adapt marker neighborhoods per scope.
+
+⛩️:
+  # ===========================================================================
+  # Core Meanings
+  # ===========================================================================
+
+  Meaning@Audit:
+    Category: /Busbar/Audit
+    meaning: Audit
+    purpose: Security-relevant records bound to composed context and identity
+
+  Meaning@AuditEntry:
+    Category: /Busbar/Audit/Entry
+    meaning: Audit Entry
+    purpose: Immutable record of a security-relevant event bound to a composed frame and target selectors
+
+  Meaning@AuditEventType:
+    Category: /Busbar/Audit/EventType
+    meaning: Audit Event Type
+    purpose: Gradient severity classification of the kind of event being recorded
+
+  Meaning@Outcome:
+    Category: /Busbar/Policy/Outcome
+    meaning: Outcome
+    purpose: Normalized authorization outcome (modeled; not boolean)
+
+  Meaning@Severity:
+    Category: /Busbar/Audit/Severity
+    meaning: Severity
+    purpose: Gradient severity signal for audit and alerting
+
+  Meaning@Category:
+    Category: /Busbar/Audit/Category
+    meaning: Category
+    purpose: Semantic grouping of audit events for filtering and routing
+
+  Meaning@timestamp:
+    Category: /Busbar/Audit/Fields
+    meaning: Timestamp
+    purpose: ISO 8601 timestamp when the event occurred
+
+  Meaning@event_type:
+    Category: /Busbar/Audit/Fields
+    meaning: Event Type
+    purpose: Type of audit event (modeled as gradient mapping)
+
+  Meaning@severity:
+    Category: /Busbar/Audit/Fields
+    meaning: Severity
+    purpose: Event severity signal used for alerting/routing (modeled as gradient mapping)
+
+  Meaning@category:
+    Category: /Busbar/Audit/Fields
+    meaning: Category
+    purpose: Semantic category for grouping/filtering (modeled via mapping)
+
+  Meaning@frame_hash:
+    Category: /Busbar/Provenance
+    meaning: Frame Hash
+    purpose: Cryptographic binding to composed context state at decision/event time
+
+  Meaning@context:
+    Category: /Busbar/Audit/Fields
+    meaning: Context
+    purpose: HQL selector locating the execution anchoring context
+
+  Meaning@principal:
+    Category: /Busbar/Identity
+    meaning: Principal
+    purpose: HQL selector locating principal/identity context within the frame
+
+  Meaning@action:
+    Category: /Busbar/Policy
+    meaning: Action
+    purpose: Canonical Busbar action name being performed (never meaningful without context)
+
+  Meaning@Targets:
+    Category: /Busbar/Policy
+    meaning: Targets
+    purpose: Named Space of HQL selectors describing resources/tools/identity contexts involved (no lists)
+
+  Meaning@signals:
+    Category: /Busbar/Signals
+    meaning: Signals
+    purpose: HQL selector or named Space capturing signal inputs and/or resolved marker meanings
+
+  Meaning@reason:
+    Category: /Busbar/Policy/Explain
+    meaning: Reason
+    purpose: Human-readable explanation bound to marker neighborhoods and scope
+
+  Meaning@request_id:
+    Category: /Busbar/Audit/Fields
+    meaning: Request ID
+    purpose: Correlation identifier for joining audit events across spans/systems
+
+  Meaning@span:
+    Category: /Busbar/Audit/Tracing
+    meaning: Span
+    purpose: Trace span identifiers for distributed tracing correlation
+
+  Meaning@delegation_chain:
+    Category: /Busbar/Identity/Delegation
+    meaning: Delegation Chain
+    purpose: HQL selector locating delegation chain context (if any)
+
+  Meaning@attachments:
+    Category: /Busbar/Audit/Fields
+    meaning: Attachments
+    purpose: Named Space of additional audit attachments (no lists)
+
+  Meaning@notes:
+    Category: /Busbar/Audit/Fields
+    meaning: Notes
+    purpose: Free-form structured notes bound to the audit entry (still meaningful because addressable and contextual)
+
+  # ===========================================================================
+  # Modeled Gradients (no enums, no booleans)
+  # ===========================================================================
+
+  # Outcome as a modeled gradient (mirrors policy.kant, duplicated here as an
+  # anchor in case Audit is composed without Policy module present).
+  Meaning@Outcome:
+    Mapping:
+      -1.0:
+        meaning: Deny
+        purpose: Authorization denied
+        Convert: Text
+        value: deny
+      0.0:
+        meaning: Indeterminate
+        purpose: Insufficient information; treat as deny in strict enforcing modes
+        Convert: Text
+        value: indeterminate
+      1.0:
+        meaning: Permit
+        purpose: Authorization granted
+        Convert: Text
+        value: permit
+
+  # Severity as a modeled gradient.
+  Meaning@Severity:
+    Mapping:
+      -1.0:
+        meaning: Trace
+        purpose: Fine-grained internal diagnostics
+        Convert: Text
+        value: trace
+      -0.5:
+        meaning: Debug
+        purpose: Detailed debugging information
+        Convert: Text
+        value: debug
+      0.0:
+        meaning: Info
+        purpose: Normal informational event
+        Convert: Text
+        value: info
+      0.5:
+        meaning: Warn
+        purpose: Suspicious or policy-relevant condition; may require attention
+        Convert: Text
+        value: warn
+      1.0:
+        meaning: Critical
+        purpose: Immediate action required; high-impact security or integrity event
+        Convert: Text
+        value: critical
+
+  # Category is modeled (not enum) because category semantics can evolve per org/scope.
+  Meaning@Category:
+    Mapping:
+      -1.0:
+        meaning: System
+        purpose: Internal system lifecycle and integrity events
+        Convert: Text
+        value: system
+      -0.5:
+        meaning: Identity
+        purpose: Authentication/identity/trust chain events
+        Convert: Text
+        value: identity
+      0.0:
+        meaning: Policy
+        purpose: Authorization, policy routing, and decision events
+        Convert: Text
+        value: policy
+      0.5:
+        meaning: Tool
+        purpose: Tool brokering/invocation events
+        Convert: Text
+        value: tool
+      1.0:
+        meaning: Change
+        purpose: Context mutation / write-back / regrounding related events
+        Convert: Text
+        value: change
+
+  # AuditEventType is also a modeled gradient. It is *not* the same as severity:
+  # event_type says "what kind of thing happened"; severity says "how important".
+  Meaning@AuditEventType:
+    Mapping:
+      -1.0:
+        meaning: Auth
+        purpose: Authentication event (login/logout/token issuance)
+        Convert: Text
+        value: auth
+      -0.5:
+        meaning: Authz
+        purpose: Authorization decision or policy evaluation event
+        Convert: Text
+        value: authz
+      0.0:
+        meaning: Access
+        purpose: Resource access (read/list/query) or tool discovery
+        Convert: Text
+        value: access
+      0.5:
+        meaning: Modify
+        purpose: Resource modification (create/update) or state mutation proposal
+        Convert: Text
+        value: modify
+      1.0:
+        meaning: Delete
+        purpose: Resource deletion or destructive operation
+        Convert: Text
+        value: delete
+
+  # ===========================================================================
+  # Shapes
+  # ===========================================================================
+
+  # Audit entry schema. This is the canonical Busbar shape for audit records.
+  Space@AuditEntry:
+    timestamp
+    event_type
+    severity
+    category
+    frame_hash
+    context
+    principal
+    action
+    outcome
+    Targets
+    signals
+    reason
+    request_id
+    span
+    delegation_chain
+    attachments
+    notes
+
+  # A minimal Target shape (mirrors policy.kant); duplicated here so Audit
+  # can always reference Targets structurally even if Policy module isn't stacked.
+  Space@Target:
+    selector
+    purpose
+    scope
+
+  # Span shape (no lists; named children if more fields are needed).
+  Space@Span:
+    trace_id
+    span_id
+    parent_span_id
+
+  # ===========================================================================
+  # Busbar Audit Anchor (default instance under /Busbar/Audit)
+  # ===========================================================================
+
+Busbar:
+  Audit@Audit:
+    meaning: Audit
+    purpose: Anchor for composed audit schema and event categories/types
+
+    # Category anchors (optional, but stable addresses help explainability)
+    Categories:
+      Identity:
+        meaning: Category
+        purpose: Identity/auth-related audit entries
+      Policy:
+        meaning: Category
+        purpose: Policy routing/decision audit entries
+      Tool:
+        meaning: Category
+        purpose: Tool invocation/brokering audit entries
+      System:
+        meaning: Category
+        purpose: System lifecycle/integrity audit entries
+      Change:
+        meaning: Category
+        purpose: Context mutation/write-back/regrounding audit entries
+
+    # Entry templates (optional defaults). Concrete systems will write actual events
+    # elsewhere, but having stable example nodes helps introspection and testing.
+    Entries:
+      PolicyEvaluation@AuditEntry:
+        event_type: -0.5
+        severity: 0.0
+        category: 0.0
+        outcome: 0.0
+        reason: Policy evaluation occurred
+
+      ToolPermit@AuditEntry:
+        event_type: -0.5
+        severity: 0.0
+        category: 0.5
+        outcome: 1.0
+        reason: Tool invocation permitted by policy
+
+      ToolDeny@AuditEntry:
+        event_type: -0.5
+        severity: 0.5
+        category: 0.5
+        outcome: -1.0
+        reason: Tool invocation denied by policy

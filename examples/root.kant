@@ -1,0 +1,185 @@
+# Busbar Kernel — Root Vocabulary
+#
+# This file establishes the canonical Busbar root and the minimum stable
+# declared-language anchors under the universal address space `/Busbar`.
+#
+# Design constraints (intentional):
+# - No lists, no nulls, no booleans (unless modeled as Mapping).
+# - No meaningless data: every structural primitive has Meaning and purpose.
+# - Layering is core: this is a low-level substrate meant to be composed on top.
+# - Universal addressability: points are identified by their path in the tree.
+#
+# This file does NOT attempt a universal ontology. It provides a kernel vocabulary
+# that allows secure contextual language emergence through composition.
+
+⛩️:
+  # ---------------------------------------------------------------------------
+  # Root: Busbar
+  # ---------------------------------------------------------------------------
+
+  Meaning@Busbar:
+    Category: /Busbar
+    meaning: Busbar Root
+    purpose: Canonical root for all Busbar context, declared language, and governance structure
+
+  Space@Busbar:
+    Provenance:
+    Identity:
+    Signals:
+    Policy:
+    Audit:
+    Mediation:
+    Execution:
+    Adapters:
+    Domains:
+
+  # ---------------------------------------------------------------------------
+  # Common anchor meanings (so subtrees can be reasoned about uniformly)
+  # ---------------------------------------------------------------------------
+
+  Meaning@Provenance:
+    Category: /Busbar/Provenance
+    meaning: Provenance
+    purpose: Where context came from and what it is bound to (frames, sources, seals)
+
+  Meaning@Identity:
+    Category: /Busbar/Identity
+    meaning: Identity
+    purpose: Principal chain and trust context bound to invocations and decisions
+
+  Meaning@Signals:
+    Category: /Busbar/Signals
+    meaning: Signals
+    purpose: Gradient semantic signal spaces expressed via Mapping/Marker neighborhoods
+
+  Meaning@Policy:
+    Category: /Busbar/Policy
+    meaning: Policy
+    purpose: Context-native policy language, routing, and composition; produces decisions bound to context
+
+  Meaning@Audit:
+    Category: /Busbar/Audit
+    meaning: Audit
+    purpose: Security-relevant events and immutable records bound to composed context and identity
+
+  Meaning@Mediation:
+    Category: /Busbar/Mediation
+    meaning: Mediation
+    purpose: Tool and server registries plus controlled brokering between callers and external capabilities
+
+  Meaning@Execution:
+    Category: /Busbar/Execution
+    meaning: Execution
+    purpose: Workflows, racks, modules, and operational orchestration primitives
+
+  Meaning@Adapters:
+    Category: /Busbar/Adapters
+    meaning: Adapters
+    purpose: Integration layers that adapt external systems (e.g., policy engines) to Busbar’s canonical language
+
+  Meaning@Domains:
+    Category: /Busbar/Domains
+    meaning: Domains
+    purpose: Domain-specific declared language that composes on top of the Busbar kernel
+
+  # ---------------------------------------------------------------------------
+  # Anchor Spaces (structural roots)
+  # ---------------------------------------------------------------------------
+
+  Space@Provenance:
+    # Children declared in provenance.kant
+    Frame:
+    Ground:
+    Source:
+
+  Space@Identity:
+    # Children declared in identity.kant
+    PrincipalChain:
+    Trust:
+
+  Space@Signals:
+    # Children declared in signals.kant
+    # Kernel signals are declared as Meaning@<signal> with Mapping neighborhoods
+    # and may be adapted by boundaries.
+    Security:
+    Execution:
+
+  Space@Policy:
+    # Children declared in policy.kant
+    Routing:
+    Sets:
+    Decisions:
+    Explain:
+
+  Space@Audit:
+    # Children declared in audit.kant
+    Entries:
+    Categories:
+
+  Space@Mediation:
+    # Children declared in mediation.kant
+    Registry:
+
+  Space@Execution:
+    # Children declared in execution.kant
+    Workflows:
+    Racks:
+
+  Space@Adapters:
+    # Adapter namespaces live under here (e.g., Cedar adapter) but Busbar language remains canonical.
+    PolicyEngines:
+    Providers:
+
+  Space@Domains:
+    # Domain vocabularies should live here (e.g., GitHub, Salesforce, Filesystem),
+    # but are not part of the kernel root file.
+    Providers:
+    Org:
+    Project:
+
+# ---------------------------------------------------------------------------
+# Kernel Context Root
+# ---------------------------------------------------------------------------
+#
+# This instantiates the canonical `/Busbar` point in context space.
+# Additional kernel files will populate the child subtrees declared above.
+
+Busbar@Busbar:
+  meaning: Busbar Root
+  purpose: Canonical root for all Busbar context
+
+  Provenance:
+    meaning: Provenance
+    purpose: Anchor for provenance bindings (frames/sources/seals)
+
+  Identity:
+    meaning: Identity
+    purpose: Anchor for principal-chain identity and trust context
+
+  Signals:
+    meaning: Signals
+    purpose: Anchor for gradient signal spaces; markers may be adapted per scope via boundaries
+
+  Policy:
+    meaning: Policy
+    purpose: Anchor for context-native policy routing and compositional policy sets
+
+  Audit:
+    meaning: Audit
+    purpose: Anchor for typed audit records bound to invocation context
+
+  Mediation:
+    meaning: Mediation
+    purpose: Anchor for mediation-plane registries (servers/tools/capabilities)
+
+  Execution:
+    meaning: Execution
+    purpose: Anchor for workflow/rack/module orchestration primitives
+
+  Adapters:
+    meaning: Adapters
+    purpose: Anchor for adapters that compile or project Busbar policy into external evaluators
+
+  Domains:
+    meaning: Domains
+    purpose: Anchor for domain-specific declared language that composes on top of Busbar kernel

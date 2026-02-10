@@ -1,0 +1,41 @@
+# Busbar Kernel Entrypoint
+#
+# Stable stack root for Busbar's declared language.
+# Composes kernel modules into a single substrate via k-way merge.
+#
+# Priorities order the merge; higher wins. Each source composes into
+# its own Frame then stacks below this file's context.
+
+⛩️:
+  Stack:
+    0.1:
+      Source: Repo
+      path: .kantext/busbar/root.kant
+
+    0.2:
+      Source: Repo
+      path: .kantext/busbar/provenance.kant
+
+    0.3:
+      Source: Repo
+      path: .kantext/busbar/identity.kant
+
+    0.4:
+      Source: Repo
+      path: .kantext/busbar/signals.kant
+
+    0.5:
+      Source: Repo
+      path: .kantext/busbar/mediation.kant
+
+    0.6:
+      Source: Repo
+      path: .kantext/busbar/policy.kant
+
+    0.7:
+      Source: Repo
+      path: .kantext/busbar/audit.kant
+
+    0.8:
+      Source: Repo
+      path: .kantext/busbar/execution.kant

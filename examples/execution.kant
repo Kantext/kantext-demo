@@ -1,0 +1,219 @@
+# Busbar Execution Kernel
+#
+# This file defines the declared-language substrate for Busbar execution:
+# workflows, actions, racks, modules, and patches (Eurorack-inspired).
+#
+# Design constraints:
+# - No lists: multiplicity is expressed as named children in Spaces.
+# - No nulls: absence must be modeled explicitly.
+# - No booleans: model on/off as signal mappings if needed.
+# - Universal addressability: points are identified by their path; the same
+#   address refers to the same X-axis point across compositions.
+#
+# Layering is core:
+# - Repo-local context commonly lives under `.busbar/` and can layer on top.
+# - Environment-specific semantics (e.g. Production) should be expressed via
+#   Boundaries that adapt Marker neighborhoods (e.g. thresholds, meanings).
+#
+# Category Root: /Busbar/Execution
+
+⛩️:
+  # ===========================================================================
+  # Meanings
+  # ===========================================================================
+
+  Meaning@Execution:
+    Category: /Busbar/Execution
+    meaning: Execution
+    purpose: Canonical Busbar execution substrate (workflows, racks, modules, patches)
+
+  Meaning@Workflow:
+    Category: /Busbar/Execution/Workflow
+    meaning: Workflow
+    purpose: Directed graph of Actions executed in a context-native manner
+
+  Meaning@Action:
+    Category: /Busbar/Execution/Action
+    meaning: Action
+    purpose: Executable workflow node; an action is always executed in context
+
+  Meaning@Rack:
+    Category: /Busbar/Execution/Rack
+    meaning: Rack
+    purpose: Runtime container that hosts modules, isolates capability boundaries, and routes signals
+
+  Meaning@Module:
+    Category: /Busbar/Execution/Module
+    meaning: Module
+    purpose: Sandboxed execution unit (typically WASM) with declared grants and ports
+
+  Meaning@Patch:
+    Category: /Busbar/Execution/Patch
+    meaning: Patch
+    purpose: A connection (cable) between module ports using typed signals
+
+  Meaning@Grant:
+    Category: /Busbar/Security/Grant
+    meaning: Grant
+    purpose: Capability grant permitting controlled access to resources (credentials, http, filesystem, env)
+
+  Meaning@Signal:
+    Category: /Busbar/Signals
+    meaning: Signal
+    purpose: Typed data flowing between workflow/actions/modules; semantics are defined by Mapping/Marker neighborhoods
+
+  Meaning@CVSignal:
+    Category: /Busbar/Signals/CV
+    meaning: CV Signal
+    purpose: Continuous control signal in normalized space (commonly [-1.0, 1.0])
+
+  Meaning@GateSignal:
+    Category: /Busbar/Signals/Gate
+    meaning: Gate Signal
+    purpose: Trigger / on-off intent modeled as a gradient (do not use booleans)
+
+  Meaning@CCSignal:
+    Category: /Busbar/Signals/CC
+    meaning: CC Signal
+    purpose: Discrete control change signal; typically carries controller number + value
+
+  Meaning@depends:
+    Category: /Busbar/Execution/Action
+    meaning: Dependencies
+    purpose: Named dependencies on other actions; expressed as named children (no lists)
+
+  Meaning@timeout_ms:
+    Category: /Busbar/Execution
+    meaning: Timeout (ms)
+    purpose: Execution timeout in milliseconds
+
+  Meaning@retry:
+    Category: /Busbar/Execution
+    meaning: Retry
+    purpose: Retry configuration expressed structurally (no lists)
+
+  Meaning@condition:
+    Category: /Busbar/Execution
+    meaning: Condition
+    purpose: Conditional execution expression; should be evaluated in context (HQL-based when possible)
+
+  Meaning@wasm:
+    Category: /Busbar/Execution/Module
+    meaning: WASM Module Path
+    purpose: Path or reference to a WASM module artifact
+
+  Meaning@ports:
+    Category: /Busbar/Execution/Module
+    meaning: Ports
+    purpose: Named ports that can be patched; names are universally addressable
+
+  Meaning@from:
+    Category: /Busbar/Execution/Patch
+    meaning: From
+    purpose: Source module/port for a patch
+
+  Meaning@to:
+    Category: /Busbar/Execution/Patch
+    meaning: To
+    purpose: Destination module/port for a patch
+
+  Meaning@signal_type:
+    Category: /Busbar/Execution/Patch
+    meaning: Signal Type
+    purpose: Signal kind used on a patch (CV/Gate/CC/Data); modeled as structure
+
+  Meaning@description:
+    Category: /Busbar/Execution
+    meaning: Description
+    purpose: Human-readable description
+
+  Meaning@action:
+    Category: /Busbar/Execution/Action
+    meaning: Action Type
+    purpose: Action type identifier; resolved to implementation via module/capability routing
+
+  # ===========================================================================
+  # Shapes (Spaces)
+  # ===========================================================================
+
+  # Root Execution space (anchored under /Busbar/Execution by root.kant)
+  Space@Execution:
+    Workflows
+    Racks
+
+  # Workflow shape:
+  # - Children are named Action nodes (no list)
+  Space@Workflow:
+    description
+    timeout_ms
+    rack
+
+  # Action shape:
+  # - Children may include action-specific fields (often ValueBonds)
+  # - Dependencies are named children, not an array
+  Space@Action:
+    action
+    depends
+    timeout_ms
+    retry
+    condition
+
+  # Retry shape:
+  Space@Retry:
+    max_attempts
+    backoff_ms
+    jitter
+
+  # Rack shape:
+  # - Children are named Modules and named Patches (no lists)
+  Space@Rack:
+    description
+    Modules
+    Patches
+    Grants
+
+  # Module shape:
+  Space@Module:
+    wasm
+    grants
+    ports
+    description
+
+  # Port shape:
+  Space@Ports:
+    signal_type
+    purpose
+
+  # Patch shape:
+  Space@Patch:
+    from
+    to
+    signal_type
+
+  # Grant shape:
+  Space@Grant:
+    credential
+    http
+    filesystem
+    env
+
+# ===========================================================================
+# Context Anchors (minimal; intended to be extended by repo-local `.busbar/`)
+# ===========================================================================
+#
+# These anchors ensure stable universal addresses exist for execution concepts.
+# Repo contexts should compose/override under these anchors rather than invent
+# parallel roots.
+
+Busbar:
+  Execution@Execution:
+    meaning: Execution
+    purpose: Anchor for workflow/rack/module execution primitives
+
+    Workflows:
+      meaning: Workflows
+      purpose: Named workflow definitions live here
+
+    Racks:
+      meaning: Racks
+      purpose: Named rack runtimes live here

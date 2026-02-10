@@ -1,0 +1,196 @@
+# Busbar Kernel — Identity
+#
+# Purpose:
+# - Declare the stable identity/principal-chain vocabulary under `/Busbar/Identity`.
+# - Model trust as a gradient space (no booleans, no meaningless enums).
+# - Keep this module small and durable: identity is foundational and monotonic.
+#
+# Design constraints:
+# - No lists: multiplicity is modeled as named Spaces of named children.
+# - No nulls: absence/unknown must be modeled explicitly (e.g., signals/markers).
+# - No boolean: Trust is a Mapping; other binary notions must be modeled similarly.
+# - Context-native: identity context should be addressable by HQL and bound into
+#   invocations/decisions/audit via selectors.
+
+⛩️:
+  # ===========================================================================
+  # Meanings
+  # ===========================================================================
+
+  Meaning@Principal:
+    Category: /Busbar/Identity
+    meaning: Principal
+    purpose: An accountable identity actor (user, binary, machine, workload) participating in an invocation
+
+  Meaning@PrincipalChain:
+    Category: /Busbar/Identity
+    meaning: Principal Chain
+    purpose: Ordered identity chain binding execution to provenance (binary → machine → user → ...)
+
+  Meaning@PrincipalKind:
+    Category: /Busbar/Identity
+    meaning: Principal Kind
+    purpose: Semantic kind of principal node (user, machine, binary, workload, service, etc.) modeled without enums
+
+  Meaning@Trust:
+    Category: /Busbar/Identity/Trust
+    meaning: Trust
+    purpose: Trust context and gradients used to interpret identity strength and gating
+
+  Meaning@TrustLevel:
+    Category: /Busbar/Identity/Trust
+    meaning: Trust Level
+    purpose: Trust strength modeled as a Mapping neighborhood; boundaries may adapt marker semantics per scope
+
+  Meaning@id:
+    Category: /Busbar/Identity
+    meaning: Identifier
+    purpose: Stable identifier for a principal (string-like); should be auditable and addressable
+
+  Meaning@issuer:
+    Category: /Busbar/Identity
+    meaning: Issuer
+    purpose: Authority/issuer of an identity assertion (OIDC issuer, CA, build system, etc.)
+
+  Meaning@subject:
+    Category: /Busbar/Identity
+    meaning: Subject
+    purpose: Subject claim or canonical subject string for a principal assertion
+
+  Meaning@fingerprint:
+    Category: /Busbar/Identity
+    meaning: Fingerprint
+    purpose: Content-derived fingerprint for a principal (e.g., binary hash, public key hash)
+
+  Meaning@attested:
+    Category: /Busbar/Identity/Trust
+    meaning: Attested
+    purpose: Whether an identity link is attested; modeled by a trust gradient rather than boolean
+
+  Meaning@reason:
+    Category: /Busbar/Identity/Trust
+    meaning: Reason
+    purpose: Human explanation for trust classification or identity interpretation
+
+  Meaning@confidence:
+    Category: /Busbar/Signals/Confidence
+    meaning: Confidence
+    purpose: Reference to canonical confidence signal; identity may contribute to it
+
+  # ===========================================================================
+  # TrustLevel Mapping (gradient, not boolean)
+  # ===========================================================================
+  #
+  # Canonical markers. Boundaries may adapt semantics and/or add interior anchors,
+  # but endpoints should remain stable.
+
+  Meaning@TrustLevel:
+    Mapping:
+      -1.0:
+        meaning: Anonymous
+        purpose: No authentication, untrusted; identity may be missing or unverifiable
+        Convert: Text
+        value: anonymous
+
+      0.0:
+        meaning: Authenticated
+        purpose: Identity verified but not attested; typical user session with basic checks
+        Convert: Text
+        value: authenticated
+
+      0.5:
+        meaning: Verified
+        purpose: Identity verified via workload identity or stronger verification steps
+        Convert: Text
+        value: verified
+
+      1.0:
+        meaning: Attested
+        purpose: Signed/attested identity link with build/runtime provenance
+        Convert: Text
+        value: attested
+
+  # ===========================================================================
+  # Shapes (structural substrate)
+  # ===========================================================================
+
+  # Principal represents a single identity link.
+  #
+  # NOTE: fields are intentionally minimal and text-like to avoid Cartesian explosion.
+  # Any domain-specific identity details should live in Domains and be referenced
+  # via HQL selectors.
+  Space@Principal:
+    id
+    kind
+    issuer
+    subject
+    fingerprint
+    trust
+    reason
+
+  # PrincipalChain represents a chain of principals bound together.
+  #
+  # No lists: chain elements are named children. Suggested canonical names:
+  # - Binary
+  # - Machine
+  # - User
+  # - Workload
+  # - Delegator
+  #
+  # The parser/engine can treat ordering semantically by these names or by
+  # additional projected relationships; base language does not require a list.
+  Space@PrincipalChain:
+    meaning
+    purpose
+
+  # Trust root container.
+  Space@Trust:
+    Levels
+
+# ===========================================================================
+# Kernel Context Root (identity anchors under /Busbar)
+# ===========================================================================
+
+Busbar:
+  Identity@Identity:
+    meaning: Identity
+    purpose: Anchor for principal-chain identity and trust context
+
+    PrincipalChain:
+      meaning: Principal Chain
+      purpose: Anchor for principal chain nodes bound to invocations/decisions
+
+      # A conventional, always-present "Current" chain anchor. Runtime layers
+      # can populate or override these nodes; policy can uniformly target it via HQL.
+      Current@PrincipalChain:
+        meaning: Principal Chain
+        purpose: The principal chain bound to the current invocation context
+
+        # Default placeholders (safe, minimal). Real values should be layered by runtime.
+        Binary@Principal:
+          kind: binary
+          trust: 0.0
+          reason: Unspecified binary identity in base kernel
+
+        Machine@Principal:
+          kind: machine
+          trust: 0.0
+          reason: Unspecified machine identity in base kernel
+
+        User@Principal:
+          kind: user
+          trust: -1.0
+          reason: No authenticated user bound in base kernel
+
+    Trust@Trust:
+      meaning: Trust
+      purpose: Trust context and gradients
+
+      Levels:
+        meaning: Trust Levels
+        purpose: Canonical trust level mapping anchors; boundaries may adapt markers per scope
+
+        Anonymous@TrustLevel: -1.0
+        Authenticated@TrustLevel: 0.0
+        Verified@TrustLevel: 0.5
+        Attested@TrustLevel: 1.0

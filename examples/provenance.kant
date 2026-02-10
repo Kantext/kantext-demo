@@ -1,0 +1,291 @@
+# Busbar Kernel — Provenance Module
+#
+# This module defines the *declared language* for Busbar provenance:
+# where context came from, what composed substrate is being used, and
+# how to bind/verify/seal that substrate.
+#
+# Design intent:
+# - Universal addressability: provenance is addressable under /Busbar/Provenance/**.
+# - Monotonic structure: add-only; do not require deletion for evolution.
+# - No meaningless data: provenance is first-class Meaning, not ad-hoc strings.
+# - Layering is core: higher layers may add fields, add new connector types,
+#   and refine semantics (especially via Mapping/Marker for trust and modes).
+#
+# Notes:
+# - This file avoids over-committing to a single storage backend or trust scheme.
+# - Sealing is modeled declaratively as "Ground" (WHO + WHERE + WHAT) and can be
+#   produced/verified by system tooling.
+
+⛩️:
+  # ===========================================================================
+  # Meanings — core provenance vocabulary
+  # ===========================================================================
+
+  Meaning@Provenance:
+    Category: /Busbar/Provenance
+    meaning: Provenance
+    purpose: Vocabulary and structure for binding composed context to sources and seals
+
+  Meaning@Frame:
+    Category: /Busbar/Provenance
+    meaning: Frame
+    purpose: Immutable composed substrate snapshot produced by composition and k-way merge
+
+  Meaning@hash:
+    Category: /Busbar/Provenance
+    meaning: Content Hash
+    purpose: Content-addressed hash of immutable substrate (e.g., blake3)
+
+  Meaning@id:
+    Category: /Busbar/Provenance
+    meaning: Session Id
+    purpose: Session-local identifier for an in-memory composed object
+
+  Meaning@point_count:
+    Category: /Busbar/Provenance
+    meaning: Point Count
+    purpose: Total points in the composed holograph or frame
+
+  Meaning@trace_count:
+    Category: /Busbar/Provenance
+    meaning: Trace Count
+    purpose: Total traces produced during decomposition/composition
+
+  Meaning@created_at:
+    Category: /Busbar/Provenance
+    meaning: Created At
+    purpose: When a frame or seal was created (ISO 8601 DateTime)
+
+  Meaning@Source:
+    Category: /Busbar/Provenance
+    meaning: Source
+    purpose: Where a compositional fragment was loaded from (repo, git, github, virtual)
+
+  Meaning@Connector:
+    Category: /Busbar/Provenance
+    meaning: Connector
+    purpose: A concrete source connector definition used to load content
+
+  Meaning@connector_type:
+    Category: /Busbar/Provenance
+    meaning: Connector Type
+    purpose: The class of connector used to obtain content
+
+  Meaning@path:
+    Category: /Busbar/Provenance
+    meaning: Path
+    purpose: Filesystem or repo-relative path to a source artifact
+
+  Meaning@git_ref:
+    Category: /Busbar/Provenance
+    meaning: Git Ref
+    purpose: Git reference (branch, tag, or refspec) for a source
+
+  Meaning@commit:
+    Category: /Busbar/Provenance
+    meaning: Commit
+    purpose: Immutable commit identifier for a git-based source
+
+  Meaning@org:
+    Category: /Busbar/Provenance
+    meaning: Organization
+    purpose: Owning org for a remote git repository source (e.g., GitHub org)
+
+  Meaning@repo:
+    Category: /Busbar/Provenance
+    meaning: Repository
+    purpose: Repository name for a remote git repository source
+
+  Meaning@uri:
+    Category: /Busbar/Provenance
+    meaning: URI
+    purpose: Canonical locator for a connector/source (URL, file URI, etc.)
+
+  Meaning@content_type:
+    Category: /Busbar/Provenance
+    meaning: Content Type
+    purpose: Media type or content classification (e.g., text/plain, application/yaml)
+
+  Meaning@Ground:
+    Category: /Busbar/Provenance
+    meaning: Ground
+    purpose: Sealed provenance triple binding WHERE + WHAT + WHO
+
+  Meaning@where:
+    Category: /Busbar/Provenance
+    meaning: Where
+    purpose: The source connector binding for a ground
+
+  Meaning@what:
+    Category: /Busbar/Provenance
+    meaning: What
+    purpose: The composed substrate binding for a ground (frame hash)
+
+  Meaning@who:
+    Category: /Busbar/Provenance
+    meaning: Who
+    purpose: The identity binding for a ground (sealer identity)
+
+  Meaning@seal:
+    Category: /Busbar/Provenance
+    meaning: Seal
+    purpose: Cryptographic seal value (verifiable proof of ground)
+
+  Meaning@sealed_at:
+    Category: /Busbar/Provenance
+    meaning: Sealed At
+    purpose: Timestamp when a ground was sealed
+
+  Meaning@sealed_mode:
+    Category: /Busbar/Provenance
+    meaning: Sealed Mode
+    purpose: Whether the seal was created/verified in strict (production) or relaxed (dev) mode
+
+  Meaning@verification:
+    Category: /Busbar/Provenance
+    meaning: Verification
+    purpose: Verification status or result of checking a ground
+
+  Meaning@status:
+    Category: /Busbar/Provenance
+    meaning: Status
+    purpose: Status field for provenance operations and records
+
+  Meaning@reason:
+    Category: /Busbar/Policy/Explain
+    meaning: Reason
+    purpose: Human-readable reason text for provenance verification status
+
+  # ===========================================================================
+  # Mode mappings (modeled, not booleans)
+  # ===========================================================================
+
+  Meaning@sealed_mode:
+    Mapping:
+      -1.0:
+        meaning: Development
+        purpose: Relaxed verification rules, suitable for local iteration
+        Convert: Text
+        value: development
+      1.0:
+        meaning: Sealed
+        purpose: Strict verification rules, suitable for production and auditing
+        Convert: Text
+        value: sealed
+
+  Meaning@verification:
+    Mapping:
+      -1.0:
+        meaning: Unverified
+        purpose: Not verified (or verification not attempted)
+        Convert: Text
+        value: unverified
+      0.0:
+        meaning: Invalid
+        purpose: Verified and failed (tamper detected, mismatch, or missing)
+        Convert: Text
+        value: invalid
+      1.0:
+        meaning: Verified
+        purpose: Verified successfully; seal matches provenance triple
+        Convert: Text
+        value: verified
+
+  Meaning@connector_type:
+    Mapping:
+      -1.0:
+        meaning: Virtual
+        purpose: In-memory content connector (non-persistent unless grounded elsewhere)
+        Convert: Text
+        value: virtual
+      -0.5:
+        meaning: File
+        purpose: Local filesystem path connector
+        Convert: Text
+        value: file
+      0.0:
+        meaning: Git
+        purpose: Local git repository connector (content-addressed by commit/tree)
+        Convert: Text
+        value: git
+      0.5:
+        meaning: GitHub
+        purpose: Remote GitHub repository connector
+        Convert: Text
+        value: github
+      1.0:
+        meaning: Other
+        purpose: Other connector type (extend via composition)
+        Convert: Text
+        value: other
+
+  # ===========================================================================
+  # Spaces — structural shapes
+  # ===========================================================================
+
+  # Frame: immutable composed substrate metadata.
+  Space@Frame:
+    hash
+    id
+    created_at
+    point_count
+    trace_count
+    Sources
+
+  # Source: a high-level source record. This models where a fragment came from.
+  Space@Source:
+    connector_type
+    uri
+    path
+    git_ref
+    commit
+    org
+    repo
+    content_type
+    status
+
+  # Ground: sealed provenance triple, modeled as structured record.
+  Space@Ground:
+    where
+    what
+    who
+    seal
+    sealed_at
+    sealed_mode
+    verification
+    reason
+
+  # Connector: optional lower-level connector definition (if you choose to materialize it).
+  # Keep this light; concrete connector configuration can be extended in higher layers.
+  Space@Connector:
+    connector_type
+    uri
+    org
+    repo
+    path
+    git_ref
+    commit
+
+# ===========================================================================
+# Kernel Context: /Busbar/Provenance
+# ===========================================================================
+
+Busbar:
+  Provenance@Provenance:
+    meaning: Provenance
+    purpose: Canonical provenance root. Add sources, frames, and grounds here.
+
+    # Frame objects (named) may be materialized here at runtime or loaded from fixtures.
+    Frames:
+      meaning: Frame
+      purpose: Named space for frame metadata records used for binding and audit
+
+    # Sources may be materialized here for inspection or audit.
+    Sources:
+      meaning: Source
+      purpose: Named space for source connector records
+
+    # Grounds are the sealed provenance bindings (WHERE + WHAT + WHO).
+    Grounds:
+      meaning: Ground
+      purpose: Named space for sealed grounds and verification results
