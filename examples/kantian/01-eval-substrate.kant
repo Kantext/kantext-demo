@@ -1,0 +1,80 @@
+# ============================================================
+# LAYER 1: Evaluation Substrate
+# ============================================================
+#
+# Generic evaluation primitives — reusable across ANY
+# evaluation framework, not just Kantian. Confidence scales,
+# analytical reasoning, moral maxims.
+#
+# The fractal pattern: this substrate grounds evaluation
+# the same way the K8s substrate grounds infrastructure.
+# A Utilitarian framework, a Virtue Ethics framework,
+# or a Kantian framework all compose on this same base.
+#
+# Stack position: FOUNDATION
+# Consumers: Any evaluation framework
+# ============================================================
+
+⛩️:
+    Meaning@Framework:
+        meaning: Reasoning Framework
+        Category: /Evaluation/Framework
+
+    # ── Confidence Scale ─────────────────────────────────
+    # Every judgment carries its own epistemic confidence.
+    # The scale itself is Kantian in spirit: it ranges from
+    # epistemic humility to apodictic certainty.
+
+    Meaning@certainty:
+        Category: /Evaluation/Confidence
+        meaning: Epistemic confidence
+        purpose: How certain this assessment is
+
+    Meaning@certainty:
+        Mapping:
+            0.0:
+                meaning: Epistemic Humility
+                purpose: No confidence in evaluation
+            0.25:
+                meaning: Tentative Judgment
+                purpose: Significant doubt about assessment
+            0.5:
+                meaning: Balanced Assessment
+                purpose: Reasonable certainty with reservations
+            0.75:
+                meaning: Reliable Judgment
+                purpose: Strong certainty in evaluation
+            1.0:
+                meaning: Apodictic Certainty
+                purpose: Absolute confidence in assessment
+
+    ValueBond@certainty:
+        Convert: Signal
+
+    # ── Analytical Reasoning ─────────────────────────────
+    # The justification for any judgment. Not a score —
+    # the actual reasoning in natural language.
+
+    Meaning@analysis:
+        Category: /Evaluation/Reasoning
+        meaning: Analytical reasoning
+        purpose: Justification for a judgment
+
+    ValueBond@analysis:
+        Convert: Text
+        min_length: 10
+        max_length: 2048
+
+    # ── Moral Maxim ──────────────────────────────────────
+    # The principle of action under evaluation.
+    # Practical reason needs this; pure reason does not.
+
+    Meaning@maxim:
+        Category: /Evaluation/Maxim
+        meaning: Moral maxim
+        purpose: The principle of action under evaluation
+
+    ValueBond@maxim:
+        Convert: Text
+        min_length: 5
+        max_length: 512

@@ -1,0 +1,117 @@
+# ============================================================
+# LAYER 4: Medical Ethics Adaptation
+# ============================================================
+#
+# Domain adaptation: the Kantian framework is adapted for
+# evaluating medical decisions. The grounded substrate
+# (Pure Reason, Practical Reason, Meta-Critique) is preserved.
+# The medical layer ADAPTS meanings and ADDS dimensions.
+#
+# Same composition mechanism as Prometheus production/staging,
+# but applied to REASONING. The framework itself is contextual.
+# It composes. It adapts. And every adaptation is traceable
+# back through the composition layers to the grounded substrate.
+#
+# A model evaluating medical reasoning composes this layer
+# on top of the architectonic. The Kantian foundations remain;
+# the clinical context reshapes how they apply.
+#
+# Stack position: ON TOP of 01-eval + 02-scales + 03-architectonic
+# Consumers: Medical ethics evaluation
+# ============================================================
+
+⛩️:
+    # ── Medical-Specific Scales ──────────────────────────
+    # New vocabulary for the clinical domain.
+    # These extend the Kantian substrate — they don't replace it.
+
+    Meaning@consent:
+        Category: /Medical/Ethics/Consent
+        meaning: Informed consent
+        purpose: Quality of patient informed consent process
+
+    Meaning@consent:
+        Mapping:
+            -1.0:
+                meaning: Paternalistic Override
+                purpose: Decision made without patient knowledge
+            -0.5:
+                meaning: Inadequate Disclosure
+                purpose: Material information withheld
+            0.0:
+                meaning: Nominal Consent
+                purpose: Form signed but comprehension uncertain
+            0.5:
+                meaning: Informed Agreement
+                purpose: Patient understands and agrees
+            1.0:
+                meaning: Shared Decision
+                purpose: Full partnership in medical decision
+
+    ValueBond@consent:
+        Convert: Signal
+
+    Meaning@proportional:
+        Category: /Medical/Ethics/Proportionality
+        meaning: Clinical proportionality
+        purpose: Balance of benefit and burden
+
+    Meaning@proportional:
+        Mapping:
+            -1.0:
+                meaning: Harmful Excess
+                purpose: Burden far exceeds benefit
+            -0.5:
+                meaning: Questionable Benefit
+                purpose: Marginal benefit with significant burden
+            0.0:
+                meaning: Equipoise
+                purpose: Benefit and burden roughly balanced
+            0.5:
+                meaning: Favorable Balance
+                purpose: Clear benefit with manageable burden
+            1.0:
+                meaning: Optimal Care
+                purpose: Maximum benefit, minimum burden
+
+    ValueBond@proportional:
+        Convert: Signal
+
+# ── Adapted Framework ──────────────────────────────────
+# The tree structure composes with the architectonic.
+# Existing nodes get adapted meanings.
+# New nodes extend the framework for clinical contexts.
+
+Kantian:
+    PracticalReason:
+        CategoricalImperative:
+            # Adapt existing dimensions for clinical context
+            Humanity:
+                meaning: Clinical dignity assessment
+                purpose: Are patients treated as persons, not cases or data points?
+
+            Autonomy:
+                meaning: Patient self-determination
+                purpose: Is the patient's capacity for rational choice preserved?
+
+            # ADD domain-specific dimensions
+            # These compose alongside Universalizability, Humanity, Autonomy
+            InformedConsent:
+                meaning: Informed consent analysis
+                purpose: Was the patient's rational agency engaged through disclosure?
+                quality@consent: 0.0
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+            Proportionality:
+                meaning: Clinical proportionality
+                purpose: Does the intervention balance benefit against burden?
+                balance@proportional: 0.0
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+    MetaCritique:
+        # Adapt meta-critique for clinical scope
+        Scope:
+            meaning: Clinical evaluative boundaries
+            purpose: Does the ethical evaluation stay within clinical competence?

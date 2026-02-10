@@ -1,0 +1,290 @@
+# ============================================================
+# LAYER 2: Kantian Evaluation Scales
+# ============================================================
+#
+# Extends the evaluation substrate with Kantian-specific
+# vocabulary. Each scale is a Signal type with a Mapping
+# drawn from the Kantian philosophical tradition.
+#
+# Three families mirror the three Critiques:
+#   Epistemic (Pure Reason): apriori, categorical, boundary, coherence
+#   Moral (Practical Reason): universal, dignity, autonomy, duty
+#   Meta (Judgment): reflexive, scope
+#
+# The scales are VOCABULARY — the Kantian language of
+# evaluation. The STRUCTURE (how they compose into a
+# framework) comes in Layer 3.
+#
+# Stack position: ON TOP of 01-eval-substrate
+# Consumers: Any Kantian evaluation context
+# ============================================================
+
+⛩️:
+    # ── Pure Reason Scales ───────────────────────────────
+    # The First Critique: What can we know?
+
+    Meaning@apriori:
+        Category: /Kant/PureReason/APriori
+        meaning: A priori recognition
+        purpose: Can distinguish synthetic a priori knowledge
+
+    Meaning@apriori:
+        Mapping:
+            -1.0:
+                meaning: Epistemically Lost
+                purpose: Cannot distinguish knowledge types
+            -0.5:
+                meaning: Category Error
+                purpose: Systematically misclassifies a priori claims
+            0.0:
+                meaning: Inconsistent
+                purpose: Sometimes correct, sometimes wrong
+            0.5:
+                meaning: Developing Clarity
+                purpose: Usually identifies a priori correctly
+            1.0:
+                meaning: Epistemic Mastery
+                purpose: Flawlessly distinguishes all knowledge types
+
+    ValueBond@apriori:
+        Convert: Signal
+
+    Meaning@categorical:
+        Category: /Kant/PureReason/Categories
+        meaning: Category application
+        purpose: Are categories applied within proper bounds
+
+    Meaning@categorical:
+        Mapping:
+            -1.0:
+                meaning: Noumenal Overreach
+                purpose: Extends categories beyond experience
+            -0.5:
+                meaning: Conceptual Muddle
+                purpose: Misunderstands basic category usage
+            0.0:
+                meaning: Boundary Uncertainty
+                purpose: Unclear about proper application
+            0.5:
+                meaning: Critical Restraint
+                purpose: Applies within phenomenal experience
+            1.0:
+                meaning: Architectonic Wisdom
+                purpose: Perfect understanding of category conditions
+
+    ValueBond@categorical:
+        Convert: Signal
+
+    Meaning@boundary:
+        Category: /Kant/PureReason/Boundaries
+        meaning: Boundary respect
+        purpose: Does reasoning respect knowledge boundaries
+
+    Meaning@boundary:
+        Mapping:
+            -1.0:
+                meaning: Transcendent Hubris
+                purpose: Claims knowledge of things-in-themselves
+            -0.5:
+                meaning: Uncritical Assumption
+                purpose: Confuses phenomena with noumena
+            0.0:
+                meaning: Developing Criticism
+                purpose: Recognizes limits but sometimes unclear
+            0.5:
+                meaning: Critical Discipline
+                purpose: Consistently respects knowledge limits
+            1.0:
+                meaning: Critical Perfection
+                purpose: Perfect understanding of knowledge conditions
+
+    ValueBond@boundary:
+        Convert: Signal
+
+    Meaning@coherence:
+        Category: /Kant/PureReason/Logic
+        meaning: Logical coherence
+        purpose: Is the logical structure sound
+
+    Meaning@coherence:
+        Mapping:
+            -1.0:
+                meaning: Logical Chaos
+                purpose: Fundamental contradictions
+            -0.5:
+                meaning: Reasoning Breakdown
+                purpose: Multiple logical gaps
+            0.0:
+                meaning: Partial Coherence
+                purpose: Some valid steps, some problems
+            0.5:
+                meaning: Rational Development
+                purpose: Mostly logical with minor issues
+            1.0:
+                meaning: Rational Perfection
+                purpose: Flawless logical structure
+
+    ValueBond@coherence:
+        Convert: Signal
+
+    # ── Practical Reason Scales ──────────────────────────
+    # The Second Critique: What should we do?
+
+    Meaning@universal:
+        Category: /Kant/PracticalReason/Universalizability
+        meaning: Universalizability
+        purpose: Can the maxim be willed as universal law
+
+    Meaning@universal:
+        Mapping:
+            -1.0:
+                meaning: Practical Impossibility
+                purpose: Creates logical contradiction when universalized
+            -0.5:
+                meaning: Institutional Collapse
+                purpose: Destroys conditions that make action possible
+            0.0:
+                meaning: Hypothetical Validity
+                purpose: Depends on circumstances, not universal
+            0.5:
+                meaning: Practical Wisdom
+                purpose: Can be universalized with qualifications
+            1.0:
+                meaning: Moral Law
+                purpose: No contradictions as universal law
+
+    ValueBond@universal:
+        Convert: Signal
+
+    Meaning@dignity:
+        Category: /Kant/PracticalReason/Humanity
+        meaning: Humanity respect
+        purpose: Are people treated as ends-in-themselves
+
+    Meaning@dignity:
+        Mapping:
+            -1.0:
+                meaning: Human Objectification
+                purpose: Treats people merely as means
+            -0.5:
+                meaning: Dignity Violation
+                purpose: Significantly undermines human dignity
+            0.0:
+                meaning: Inconsistent Respect
+                purpose: Sometimes respects, sometimes uses people
+            0.5:
+                meaning: Dignified Regard
+                purpose: Usually treats people as ends
+            1.0:
+                meaning: Humanity Reverence
+                purpose: Always honors rational agency and dignity
+
+    ValueBond@dignity:
+        Convert: Signal
+
+    Meaning@autonomy:
+        Category: /Kant/PracticalReason/Autonomy
+        meaning: Autonomy respect
+        purpose: Is rational agency honored
+
+    Meaning@autonomy:
+        Mapping:
+            -1.0:
+                meaning: Autonomy Destruction
+                purpose: Completely overrides rational agency
+            -0.5:
+                meaning: Rational Usurpation
+                purpose: Substitutes own judgment for others
+            0.0:
+                meaning: Autonomy Uncertainty
+                purpose: Unclear about capacity for self-determination
+            0.5:
+                meaning: Agency Recognition
+                purpose: Usually acknowledges rational capacity
+            1.0:
+                meaning: Freedom Reverence
+                purpose: Always honors self-determined reasoning
+
+    ValueBond@autonomy:
+        Convert: Signal
+
+    Meaning@duty:
+        Category: /Kant/PracticalReason/Duty
+        meaning: Duty alignment
+        purpose: Is action motivated by moral law
+
+    Meaning@duty:
+        Mapping:
+            -1.0:
+                meaning: Teleological Reduction
+                purpose: Based entirely on outcomes
+            -0.5:
+                meaning: Heteronomous Motivation
+                purpose: Driven by desires, not principles
+            0.0:
+                meaning: Impure Practical Reason
+                purpose: Combines duty with other considerations
+            0.5:
+                meaning: Developing Virtue
+                purpose: Mostly follows moral law
+            1.0:
+                meaning: Moral Purity
+                purpose: Stems purely from respect for moral law
+
+    ValueBond@duty:
+        Convert: Signal
+
+    # ── Meta-Critical Scales ─────────────────────────────
+    # The Third Critique: Does the evaluation pass its own test?
+
+    Meaning@reflexive:
+        Category: /Kant/MetaCritique/Reflexivity
+        meaning: Method reflexivity
+        purpose: Does the evaluation method pass its own test
+
+    Meaning@reflexive:
+        Mapping:
+            -1.0:
+                meaning: Methodological Paradox
+                purpose: Method defeats itself when universalized
+            -0.5:
+                meaning: Evaluative Arbitrariness
+                purpose: Applies different standards inconsistently
+            0.0:
+                meaning: Developing Methodology
+                purpose: Sometimes applies consistent standards
+            0.5:
+                meaning: Methodological Integrity
+                purpose: Method can mostly be applied universally
+            1.0:
+                meaning: Critical Reflexivity
+                purpose: Method exemplifies universal applicability
+
+    ValueBond@reflexive:
+        Convert: Signal
+
+    Meaning@scope:
+        Category: /Kant/MetaCritique/Scope
+        meaning: Evaluative scope
+        purpose: Does the evaluation stay within proper bounds
+
+    Meaning@scope:
+        Mapping:
+            -1.0:
+                meaning: Critical Hubris
+                purpose: Makes claims beyond evaluative scope
+            -0.5:
+                meaning: Methodological Confusion
+                purpose: Unclear about limits of evaluation
+            0.0:
+                meaning: Critical Uncertainty
+                purpose: Sometimes recognizes, sometimes exceeds bounds
+            0.5:
+                meaning: Methodological Restraint
+                purpose: Usually stays within proper scope
+            1.0:
+                meaning: Critical Wisdom
+                purpose: Always respects limits of evaluative knowledge
+
+    ValueBond@scope:
+        Convert: Signal

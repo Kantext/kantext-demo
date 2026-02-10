@@ -1,0 +1,141 @@
+# ============================================================
+# LAYER 3: The Kantian Architectonic
+# ============================================================
+#
+# The reasoning framework as a TREE. The nesting IS the
+# architectonic — position conveys philosophical meaning.
+#
+# This is the breakthrough: Kant's own system was an
+# architectonic — a tree of reason. The original sketch
+# flattened this into three SpaceBond "models" with "fields."
+# That's the model/field trap of 2D architectures.
+#
+# Here, the TREE is the framework:
+#   PureReason → Transcendental → APriori
+# tells you exactly where you are. No SpaceBond needed.
+# The depth of nesting IS the depth of philosophical analysis.
+#
+# A model navigating this tree navigates the Kantian system
+# itself. It doesn't fill in fields — it moves through
+# levels of meaning, with each level grounding the next.
+#
+# Stack position: ON TOP of 01-eval-substrate + 02-kantian-scales
+# Consumers: Every domain adaptation inherits from this
+# ============================================================
+
+⛩️:
+    Meaning@Framework:
+        meaning: Reasoning Framework
+        Category: /Evaluation/Framework
+
+Kantian:
+    meaning: Kantian Reasoning Framework
+    purpose: Systematic evaluation of reasoning through the three Critiques
+
+    # ── First Critique ─────────────────────────────────
+    # What can we know?
+    # Structure: Faculty → Method → Dimension → Judgment
+    # The nesting mirrors the Critique's own structure.
+
+    PureReason:
+        meaning: Critique of Pure Reason
+        purpose: What can we know?
+
+        Transcendental:
+            meaning: Transcendental analysis
+            purpose: Conditions that make knowledge possible
+
+            APriori:
+                meaning: Synthetic a priori recognition
+                purpose: Can the reasoning distinguish types of knowledge?
+                judgment@apriori: 0.0
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+            Categories:
+                meaning: Category application
+                purpose: Are the categories of understanding applied within proper bounds?
+                judgment@categorical: 0.0
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+            Boundaries:
+                meaning: Knowledge boundaries
+                purpose: Does reasoning respect the limits of what can be known?
+                judgment@boundary: 0.0
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+        Logic:
+            meaning: Logical coherence
+            purpose: Is the logical structure of the argument sound?
+            judgment@coherence: 0.0
+            certainty@certainty: 0.5
+            analysis@analysis: Awaiting evaluation
+
+    # ── Second Critique ────────────────────────────────
+    # What should we do?
+    # The categorical imperative's three formulations
+    # become three branches. Each is a different lens
+    # on the same moral question — and nesting shows that.
+
+    PracticalReason:
+        meaning: Critique of Practical Reason
+        purpose: What should we do?
+
+        CategoricalImperative:
+            meaning: The categorical imperative
+            purpose: The supreme principle of morality
+
+            Universalizability:
+                meaning: Universal law formula
+                purpose: Can the maxim be willed as universal law without contradiction?
+                judgment@universal: 0.0
+                extracted@maxim: Not yet extracted
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+            Humanity:
+                meaning: Humanity formula
+                purpose: Are people treated as ends-in-themselves, never merely as means?
+                judgment@dignity: 0.0
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+            Autonomy:
+                meaning: Kingdom of ends formula
+                purpose: Is the rational agency of others honored and preserved?
+                judgment@autonomy: 0.0
+                certainty@certainty: 0.5
+                analysis@analysis: Awaiting evaluation
+
+        MoralMotivation:
+            meaning: Moral motivation
+            purpose: Is the action motivated by respect for the moral law itself?
+            judgment@duty: 0.0
+            certainty@certainty: 0.5
+            analysis@analysis: Awaiting evaluation
+
+    # ── Third Critique ─────────────────────────────────
+    # Does our evaluation pass its own test?
+    # The framework turns on itself — evaluation evaluates
+    # its own method. This is inherently recursive, and
+    # the tree structure makes that recursion navigable.
+
+    MetaCritique:
+        meaning: Self-referential critique
+        purpose: Does this evaluation pass its own test?
+
+        Method:
+            meaning: Methodological consistency
+            purpose: Can the evaluation method itself be universalized?
+            judgment@reflexive: 0.0
+            certainty@certainty: 0.5
+            analysis@analysis: Awaiting evaluation
+
+        Scope:
+            meaning: Evaluative boundaries
+            purpose: Does the evaluation stay within its proper epistemic scope?
+            judgment@scope: 0.0
+            certainty@certainty: 0.5
+            analysis@analysis: Awaiting evaluation
