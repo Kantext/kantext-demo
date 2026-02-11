@@ -29,8 +29,6 @@
         Category: /Evaluation/Confidence
         meaning: Epistemic confidence
         purpose: How certain this assessment is
-
-    Meaning@certainty:
         Mapping:
             0.0:
                 meaning: Epistemic Humility
